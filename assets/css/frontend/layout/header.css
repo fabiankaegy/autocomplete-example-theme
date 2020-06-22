@@ -1,0 +1,10 @@
+.site-header {
+	align-items: center;
+	background-color: var(--c-primary);
+	box-sizing: border-box;
+	color: var(--c-white);
+	display: flex;
+	justify-content: space-between;
+	padding: 1rem 3rem;
+	width: 100%;
+}
