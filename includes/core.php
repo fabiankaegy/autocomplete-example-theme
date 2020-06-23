@@ -214,9 +214,11 @@ function add_rest_routes() {
 
 		$categories = new \WP_Query(
 			[
-				'ep_integrate' => true,
-				'post_type'    => 'category',
-				's'            => $keyword,
+				'ep_integrate'  => true,
+				'search_fields' => [
+					'taxonomies' => [ 'product_cat' ],
+				],
+				's'             => $keyword,
 			]
 		);
 
