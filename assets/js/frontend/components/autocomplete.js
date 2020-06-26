@@ -1,3 +1,7 @@
+function createQuery(searchTerm) {
+	return `{ "index": "wss-dot-com-live" }\n{"from":0,"size":3,"_source":["term_id","name","slug"],"query":{"bool":{"should":[{"multi_match":{"query":"${searchTerm}","type":"phrase","fields":["name","slug","taxonomy","description"],"boost":4}},{"multi_match":{"query":"${searchTerm}","fields":["name","slug","taxonomy","description"],"boost":2,"fuzziness":0,"operator":"and"}},{"multi_match":{"fields":["name","slug","taxonomy","description"],"query":"${searchTerm}","fuzziness":1}}]}},"post_filter":{"bool":{"must":[{"term":{"taxonomy.raw":"post_tag"}}]}}}\n{ "index": "wss-dot-com-live" }\n{"from":0,"size":3,"_source":["post_id","post_title","permalink"],"sort":[{"_score":{"order":"desc"}}],"query":{"function_score":{"query":{"bool":{"should":[{"multi_match":{"query":"${searchTerm}","type":"phrase","fields":["post_title^1","post_excerpt^1","post_content^1","post_author.display_name^1","terms.post_tag.name^1","terms.category.name^1","terms.ep_custom_result.name^9999"],"boost":4}},{"multi_match":{"query":"${searchTerm}","fields":["post_title^1","post_excerpt^1","post_content^1","post_author.display_name^1","terms.post_tag.name^1","terms.category.name^1","terms.ep_custom_result.name^9999"],"boost":2,"fuzziness":0,"operator":"and"}},{"multi_match":{"query":"${searchTerm}","fields":["post_title^1","post_excerpt^1","post_content^1","post_author.display_name^1","terms.post_tag.name^1","terms.category.name^1","post_title.suggest^1"],"fuzziness":"auto"}}]}},"functions":[{"exp":{"post_date_gmt":{"scale":"14d","decay":0.25,"offset":"7d"}}}],"score_mode":"avg","boost_mode":"sum"}},"post_filter":{"bool":{"must":[{"terms":{"post_type.raw":["post"]}},{"terms":{"post_status":["publish"]}}]}}}\n{ "index": "wss-dot-com-live" }\n{"from":0,"size":3,"_source":["post_id","post_title","permalink"],"sort":[{"_score":{"order":"desc"}}],"query":{"function_score":{"query":{"bool":{"should":[{"multi_match":{"query":"${searchTerm}","type":"phrase","fields":["post_title^1","post_excerpt^1","post_content^1","post_author.display_name^1","terms.post_tag.name^1","terms.category.name^1","terms.ep_custom_result.name^9999"],"boost":4}},{"multi_match":{"query":"${searchTerm}","fields":["post_title^1","post_excerpt^1","post_content^1","post_author.display_name^1","terms.post_tag.name^1","terms.category.name^1","terms.ep_custom_result.name^9999"],"boost":2,"fuzziness":0,"operator":"and"}},{"multi_match":{"query":"${searchTerm}","fields":["post_title^1","post_excerpt^1","post_content^1","post_author.display_name^1","terms.post_tag.name^1","terms.category.name^1","post_title.suggest^1"],"fuzziness":"auto"}}]}},"functions":[{"exp":{"post_date_gmt":{"scale":"14d","decay":0.25,"offset":"7d"}}}],"score_mode":"avg","boost_mode":"sum"}},"post_filter":{"bool":{"must":[{"terms":{"post_type.raw":["product"]}},{"terms":{"post_status":["publish"]}}]}}}\n`;
+}
+
 export default function AutoComplete(element) {
 	const suggestions = element.parentNode.querySelector('.autocomplete');
 	const [generalColumn, categoryColumn, productColumn] = suggestions.querySelectorAll(
@@ -89,8 +93,26 @@ export default function AutoComplete(element) {
 	 * @param {string} searchTerm string to search for
 	 * @return {Object} results from ElasticPress
 	 */
-	function requestResults(searchTerm) {
-		return { products: [searchTerm] };
+	async function requestResults(searchTerm) {
+		const request = await fetch(
+			'http://es-live.wholesalesolar.com/elasticsearch/wss-dot-com-live/_msearch',
+			{
+				method: 'POST',
+				headers: {
+					'content-type': 'application/x-ndjson',
+					Authorization: 'Basic dXNlcjpKbWhEbnFSN1lFdlY=',
+				},
+				body: createQuery(searchTerm),
+			},
+		);
+
+		if (!request.ok) {
+			console.error(request.statusText);
+		}
+
+		const response = await request.text();
+
+		return response;
 	}
 
 	/**
