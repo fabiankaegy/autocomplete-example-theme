@@ -1,4 +1,7 @@
 .search-form {
+	--c-lightgrey: #8f8f8f;
+	--c-grey: #4e5e5e;
+
 	display: flex;
 	position: relative;
 
@@ -12,7 +15,7 @@
 	}
 
 	& input[type="submit"] {
-		background: #4e545a;
+		background: var(--c-grey);
 		border: none;
 		border-radius: 0 5px 5px 0;
 		display: inline-block;
@@ -43,9 +46,9 @@
 			border-right: 1px solid rgba(0, 0, 0, 0.2);
 			box-sizing: border-box;
 			flex-grow: 1;
+			margin-bottom: 0.5rem;
 			margin-right: 1rem;
 			margin-top: 0.5rem;
-			margin-bottom: 0.5rem;
 
 			&:last-of-type {
 				border-right: none;
@@ -69,7 +72,7 @@
 		}
 
 		& ul .no-results {
-			color: lightgrey;
+			color: var(--c-lightgrey);
 		}
 
 		& li a {
@@ -80,7 +83,7 @@
 			text-decoration: none;
 
 			&:hover {
-				color: grey;
+				color: var(--c-grey);
 			}
 		}
 
